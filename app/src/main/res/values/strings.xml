@@ -8,4 +8,8 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
+    <string name="nav_program">Programme</string>
+    <string name="nav_home">Acceuil</string>
+    <string name="nav_plan">Plan</string>
+    <string name="nav_companies">Entreprises participantes</string>
 </resources>
