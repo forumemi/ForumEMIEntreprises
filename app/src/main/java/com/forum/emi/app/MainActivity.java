@@ -1,10 +1,10 @@
 package com.forum.emi.app;
 
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -12,13 +12,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
-
-
+        implements NavigationView.OnNavigationItemSelectedListener  {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +48,7 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
     }
 
     @Override
@@ -85,12 +90,53 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            // Handle the camera action
+            //set HOME LAYOUT as visible
+            ConstraintLayout homeLayout = (ConstraintLayout)findViewById(R.id.home_layout);
+            homeLayout.setVisibility(View.VISIBLE);
+            ConstraintLayout programLayout = (ConstraintLayout)findViewById(R.id.program_layout);
+            programLayout.setVisibility(View.INVISIBLE);
+            ConstraintLayout planLayout = (ConstraintLayout)findViewById(R.id.plan_layout);
+            planLayout.setVisibility(View.INVISIBLE);
+            ConstraintLayout companiesLayout = (ConstraintLayout)findViewById(R.id.companies_layout);
+            companiesLayout.setVisibility(View.INVISIBLE);
+            //end
+
         } else if (id == R.id.nav_program) {
+            //set PROGRAM LAYOUT as visible
+            ConstraintLayout homeLayout = (ConstraintLayout)findViewById(R.id.home_layout);
+            homeLayout.setVisibility(View.INVISIBLE);
+            ConstraintLayout programLayout = (ConstraintLayout)findViewById(R.id.program_layout);
+            programLayout.setVisibility(View.VISIBLE);
+            ConstraintLayout planLayout = (ConstraintLayout)findViewById(R.id.plan_layout);
+            planLayout.setVisibility(View.INVISIBLE);
+            ConstraintLayout companiesLayout = (ConstraintLayout)findViewById(R.id.companies_layout);
+            companiesLayout.setVisibility(View.INVISIBLE);
+            //end
+
 
         } else if (id == R.id.nav_plan) {
+            //set PLAN LAYOUT as visible
+            ConstraintLayout homeLayout = (ConstraintLayout)findViewById(R.id.home_layout);
+            homeLayout.setVisibility(View.INVISIBLE);
+            ConstraintLayout programLayout = (ConstraintLayout)findViewById(R.id.program_layout);
+            programLayout.setVisibility(View.INVISIBLE);
+            ConstraintLayout planLayout = (ConstraintLayout)findViewById(R.id.plan_layout);
+            planLayout.setVisibility(View.VISIBLE);
+            ConstraintLayout companiesLayout = (ConstraintLayout)findViewById(R.id.companies_layout);
+            companiesLayout.setVisibility(View.INVISIBLE);
+            //end
 
         } else if (id == R.id.nav_companies) {
+            //set COMPANIES LAYOUT as visible
+            ConstraintLayout homeLayout = (ConstraintLayout)findViewById(R.id.home_layout);
+            homeLayout.setVisibility(View.INVISIBLE);
+            ConstraintLayout programLayout = (ConstraintLayout)findViewById(R.id.program_layout);
+            programLayout.setVisibility(View.INVISIBLE);
+            ConstraintLayout planLayout = (ConstraintLayout)findViewById(R.id.plan_layout);
+            planLayout.setVisibility(View.INVISIBLE);
+            ConstraintLayout companiesLayout = (ConstraintLayout)findViewById(R.id.companies_layout);
+            companiesLayout.setVisibility(View.VISIBLE);
+            //end
 
         } else if (id == R.id.nav_share) {
 
@@ -101,5 +147,25 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+    static final int BUFF_SIZE = 2048;
+    static final String DEFAULT_ENCODING = "utf-8";
+
+    public static String readFileToString(String filePath, String encoding) throws IOException {
+
+        if (encoding == null || encoding.length() == 0)
+            encoding = DEFAULT_ENCODING;
+
+        StringBuffer content = new StringBuffer();
+
+        FileInputStream fis = new FileInputStream(new File(filePath));
+        byte[] buffer = new byte[BUFF_SIZE];
+
+        int bytesRead = 0;
+        while ((bytesRead = fis.read(buffer)) != -1)
+            content.append(new String(buffer, 0, bytesRead, encoding));
+
+        fis.close();
+        return content.toString();
     }
 }
