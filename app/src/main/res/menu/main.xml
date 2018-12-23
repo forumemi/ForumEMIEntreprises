@@ -9,5 +9,11 @@
     <item
         android:id="@+id/action_signin"
         android:title="@string/signin"
-        app:showAsAction="never"/>
+        app:showAsAction="never"
+        android:visible="false"/>
+    <item
+        android:id="@+id/action_signout"
+        android:title="@string/signout"
+        app:showAsAction="never"
+        android:visible="false"/>
 </menu>
