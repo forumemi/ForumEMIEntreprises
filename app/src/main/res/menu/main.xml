@@ -7,8 +7,7 @@
         android:title="@string/action_settings"
         app:showAsAction="never" />
     <item
-        android:id="@+id/checkbox"
-        android:title="checkbox"
-        android:checkable="true"
-        app:actionViewClass="android.widget.CheckBox"/>
+        android:id="@+id/action_signin"
+        android:title="@string/signin"
+        app:showAsAction="never"/>
 </menu>
