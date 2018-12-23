@@ -3,23 +3,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.forum.emi.app">
 
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission android:name="android.permission.FLASHLIGHT"/>
-    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.FLASHLIGHT" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
     <!-- unavailable in API 23 -->
-    <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="com.android.browser.permission.READ_HISTORY_BOOKMARKS" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
-
-    <uses-feature android:name="android.hardware.camera.any"/>
-    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
-    <uses-feature android:name="android.hardware.camera.flash" android:required="false"/>
-    <uses-feature android:name="android.hardware.screen.landscape"/>
-    <uses-feature android:name="android.hardware.wifi" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.any" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.flash"
+        android:required="false" />
+    <uses-feature android:name="android.hardware.screen.landscape" />
+    <uses-feature
+        android:name="android.hardware.wifi"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -41,14 +46,18 @@
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".ScannerActivity"
+        <activity
+            android:name=".ScannerActivity"
             android:screenOrientation="fullSensor"
             tools:replace="screenOrientation" />
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="portrait"
-            tools:replace="android:screenOrientation"
-            android:stateNotNeeded="true"/>
+            android:stateNotNeeded="true"
+            tools:replace="android:screenOrientation" />
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"></activity>
     </application>
 
 </manifest>
