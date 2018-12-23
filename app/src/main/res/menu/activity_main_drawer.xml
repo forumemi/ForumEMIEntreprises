@@ -21,6 +21,13 @@
             android:icon="@drawable/ic_menu_manage"
             android:title="@string/nav_companies" />
     </group>
+    <item android:title="Scanner">
+        <menu>
+            <item
+                android:id="@+id/nav_qrcode"
+                android:title="Code QR"/>
+        </menu>
+    </item>
 
     <item android:title="Communicate">
         <menu>

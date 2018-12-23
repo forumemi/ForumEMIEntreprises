@@ -1,5 +1,6 @@
 package com.forum.emi.app;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -138,7 +139,10 @@ public class MainActivity extends AppCompatActivity
             companiesLayout.setVisibility(View.VISIBLE);
             //end
 
-        } else if (id == R.id.nav_share) {
+        } else if (id == R.id.nav_qrcode) {
+            Intent intent = new Intent(MainActivity.this,ScannerActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_send) {
 
         } else if (id == R.id.nav_send) {
 
