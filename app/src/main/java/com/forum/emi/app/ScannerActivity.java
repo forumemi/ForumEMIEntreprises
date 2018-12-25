@@ -16,7 +16,7 @@ public class ScannerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_scanner);
         IntentIntegrator integrator = new IntentIntegrator(ScannerActivity.this);
                 integrator.setOrientationLocked(true);
-                integrator.setPrompt("kljdfskdf");
+                integrator.setPrompt("Scannez votre QR code");
         integrator.initiateScan();
     }
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
