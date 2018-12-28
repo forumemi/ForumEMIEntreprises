@@ -3,7 +3,6 @@ package com.forum.emi.app;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -33,9 +32,9 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener  {
 
     private static final int RC_SIGN_IN = 123;
-    private SharedPreferences sharedPreferences = null;
-    MenuItem actionSignin = null;
-    MenuItem actionSignout = null;
+    public FirebaseAuth firebaseAuth = null;
+    public FirebaseUser firebaseUser = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +61,14 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseUser = firebaseAuth.getCurrentUser();
+        if (firebaseUser != null) {
+            Toast.makeText(MainActivity.this,firebaseUser.getUid(),Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(MainActivity.this,"No user connected",Toast.LENGTH_SHORT).show();
+        }
+
 
     }
 
@@ -78,15 +84,15 @@ public class MainActivity extends AppCompatActivity
 
     public boolean onPrepareOptionsMenu(Menu menu)
     {
-        MenuItem actionSignin = menu.findItem(R.id.action_signin);
-        MenuItem actionSignout = menu.findItem(R.id.action_signout);
-        String userid = sharedPreferences.getString("USER_ID","");
-        if (userid == "") {
-            actionSignin.setVisible(true);
-            actionSignout.setVisible(false);
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        MenuItem actionSignIn = menu.findItem(R.id.action_signin);
+        MenuItem actionSignOut = menu.findItem(R.id.action_signout);
+        if (firebaseUser != null){
+            actionSignIn.setVisible(false);
+            actionSignOut.setVisible(true);
         } else {
-            actionSignin.setVisible(false);
-            actionSignout.setVisible(true);
+            actionSignIn.setVisible(true);
+            actionSignOut.setVisible(false);
         }
         return true;
     }
@@ -116,9 +122,6 @@ public class MainActivity extends AppCompatActivity
             createSignInIntent();
         } else if (id == R.id.action_signout)  {
             FirebaseAuth.getInstance().signOut();
-            SharedPreferences.Editor editor =sharedPreferences.edit();
-            editor.putString("USER_ID","");
-            editor.commit();
             Intent intent = new Intent(MainActivity.this,MainActivity.class);
             startActivity(intent);
         }
@@ -152,10 +155,6 @@ public class MainActivity extends AppCompatActivity
 
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("USER_ID",user.getUid());
-                editor.commit();
             } else {
                 // Sign in failed. If response is null the user canceled the
                 // sign-in flow using the back button. Otherwise check
@@ -221,9 +220,6 @@ public class MainActivity extends AppCompatActivity
             ConstraintLayout companiesLayout = (ConstraintLayout)findViewById(R.id.companies_layout);
             companiesLayout.setVisibility(View.VISIBLE);
             //end
-
-            String userId = sharedPreferences.getString("USER_ID","");
-            Toast.makeText(MainActivity.this,userId,Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.nav_qrcode) {
             Intent intent = new Intent(MainActivity.this,ScannerActivity.class);
