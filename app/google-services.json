@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "1006230901054",
+    "firebase_url": "https://forum-emi-entreprises.firebaseio.com",
+    "project_id": "forum-emi-entreprises",
+    "storage_bucket": "forum-emi-entreprises.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1006230901054:android:dedad42794016c75",
+        "android_client_info": {
+          "package_name": "com.forum.emi.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1006230901054-ptesargp7u5iqu3qntllc4lc0qqbcfou.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.forum.emi.app",
+            "certificate_hash": "81f23f3d541cedbb5f525cbbb5cdb6a619915253"
+          }
+        },
+        {
+          "client_id": "1006230901054-4k6s9gd2d3g98g58hlppinqf2j65k2pm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBamtsCDpNXxNmx8SEEclxg3FjwUA1HJbo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1006230901054-4k6s9gd2d3g98g58hlppinqf2j65k2pm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -109,8 +109,6 @@ public class MainActivity extends AppCompatActivity
         companiesWebView.loadUrl("https://forum-emi-entreprises.firebaseapp.com/companies.html");
         programWebView.loadUrl("https://forum-emi-entreprises.firebaseapp.com/program.html");
 
-
-
     }
 
     @Override
