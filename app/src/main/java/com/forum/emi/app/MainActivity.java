@@ -1,7 +1,6 @@
 package com.forum.emi.app;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -15,6 +14,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
@@ -34,6 +36,18 @@ public class MainActivity extends AppCompatActivity
     private static final int RC_SIGN_IN = 123;
     public FirebaseAuth firebaseAuth = null;
     public FirebaseUser firebaseUser = null;
+    public WebView homeWebView = null;
+    public WebView planWebView = null;
+    public WebView programWebView = null;
+    public WebView companiesWebView = null;
+    public NavigationView navigationView = null;
+
+    public WebViewClient webViewClient = new WebViewClient(){
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            return false;
+        }
+    };
 
 
     @Override
@@ -58,7 +72,7 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         firebaseAuth = FirebaseAuth.getInstance();
@@ -68,6 +82,33 @@ public class MainActivity extends AppCompatActivity
         } else {
             Toast.makeText(MainActivity.this,"No user connected",Toast.LENGTH_SHORT).show();
         }
+        homeWebView = (WebView)findViewById(R.id.home_webview);
+        planWebView = (WebView)findViewById(R.id.plan_webview);
+        programWebView = (WebView)findViewById(R.id.program_webview);
+        companiesWebView = (WebView)findViewById(R.id.companies_webview);
+
+        WebSettings homeWebSettings = homeWebView.getSettings();
+        WebSettings planWebSettings = planWebView.getSettings();
+        WebSettings companiesWebSettings = companiesWebView.getSettings();
+        WebSettings programWebSettings = programWebView.getSettings();
+
+        homeWebSettings.setJavaScriptEnabled(true);
+        planWebSettings.setJavaScriptEnabled(true);
+        companiesWebSettings.setJavaScriptEnabled(true);
+        programWebSettings.setJavaScriptEnabled(true);
+
+        homeWebView.setWebViewClient(webViewClient);
+        planWebView.setWebViewClient(webViewClient);
+        programWebView.setWebViewClient(webViewClient);
+        companiesWebView.setWebViewClient(webViewClient);
+
+        planWebSettings.setSupportZoom(true);
+
+        homeWebView.loadUrl("https://forum-emi-entreprises.firebaseapp.com/home.html");
+        planWebView.loadUrl("https://forum-emi-entreprises.firebaseapp.com/plan.html");
+        companiesWebView.loadUrl("https://forum-emi-entreprises.firebaseapp.com/companies.html");
+        programWebView.loadUrl("https://forum-emi-entreprises.firebaseapp.com/program.html");
+
 
 
     }
@@ -77,7 +118,10 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        } else if (navigationView.getMenu().getItem(3).isChecked() && companiesWebView.canGoBack()){
+            companiesWebView.goBack();
+        }
+        else  {
             super.onBackPressed();
         }
     }
@@ -124,6 +168,11 @@ public class MainActivity extends AppCompatActivity
             FirebaseAuth.getInstance().signOut();
             Intent intent = new Intent(MainActivity.this,MainActivity.class);
             startActivity(intent);
+        } else if (id == R.id.action_refresh) {
+            companiesWebView.reload();
+            homeWebView.reload();
+            planWebView.reload();
+            programWebView.reload();
         }
 
         return super.onOptionsItemSelected(item);

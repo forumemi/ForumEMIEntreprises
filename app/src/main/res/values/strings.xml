@@ -87,4 +87,5 @@
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="signin">Se connecter</string>
     <string name="signout">Se deconnecter</string>
+    <string name="refresh">Actualiser</string>
 </resources>

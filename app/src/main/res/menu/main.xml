@@ -16,4 +16,9 @@
         android:title="@string/signout"
         app:showAsAction="never"
         android:visible="false"/>
+    <item
+        android:id="@+id/action_refresh"
+        android:title="@string/refresh"
+        android:icon="@android:drawable/ic_popup_sync"
+        app:showAsAction="always"/>
 </menu>
