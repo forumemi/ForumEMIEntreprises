@@ -24,4 +24,5 @@
     <string name="promo">Promotion</string>
     <string name="submit">Valider</string>
     <string name="form_string">Votre inscription est bientôt fini veuillez remplir ce formulaire SVP</string>
+    <string name="help">Aide</string>
 </resources>

@@ -6,6 +6,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -13,6 +15,8 @@ import android.widget.TextView;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.FirebaseFunctionsException;
 import com.google.firebase.functions.HttpsCallableResult;
@@ -24,6 +28,8 @@ import java.util.Map;
 
 public class ScannerActivity extends AppCompatActivity {
 
+    private FirebaseAuth firebaseAuth = null;
+    private FirebaseUser firebaseUser = null;
     private Button scanButton = null ;
     private FirebaseFunctions firebaseFunctions = null;
     private TextView waitingResult = null;
@@ -47,6 +53,8 @@ public class ScannerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_scanner);
 
         firebaseFunctions = FirebaseFunctions.getInstance();
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseUser = firebaseAuth.getCurrentUser();
 
         scanButton = (Button)findViewById(R.id.scan_button);
         scanButton.setOnClickListener(scanButtonListner);
@@ -117,6 +125,33 @@ public class ScannerActivity extends AppCompatActivity {
         }else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu)
+    {
+        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        MenuItem actionRefresh = menu.findItem(R.id.action_refresh);
+        MenuItem actionSignIn = menu.findItem(R.id.action_signin);
+        MenuItem actionSignOut = menu.findItem(R.id.action_signout);
+        if (firebaseUser != null){
+            actionSignIn.setVisible(false);
+            actionSignOut.setVisible(true);
+        } else {
+            actionSignIn.setVisible(true);
+            actionSignOut.setVisible(false);
+        }
+        actionRefresh.setVisible(false);
+        return true;
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
     }
 
 }

@@ -16,4 +16,8 @@
         android:title="@string/refresh"
         android:icon="@android:drawable/ic_popup_sync"
         app:showAsAction="always"/>
+    <item
+        android:id="@+id/action_help"
+        android:title="@string/help"
+        app:showAsAction="never"/>
 </menu>

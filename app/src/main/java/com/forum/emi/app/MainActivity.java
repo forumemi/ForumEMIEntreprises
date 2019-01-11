@@ -85,13 +85,14 @@ public class MainActivity extends AppCompatActivity
         firebaseUser = firebaseAuth.getCurrentUser();
         TextView navHeaderTitle = (TextView)navigationView.getHeaderView(0).findViewById(R.id.nav_header_title);
         TextView navHeaderSubtitle = (TextView)navigationView.getHeaderView(0).findViewById(R.id.nav_header_subtitle);
-        //if (firebaseUser != null){
-          //  navHeaderTitle.setText(firebaseUser.getDisplayName());
-          // navHeaderSubtitle.setText(firebaseUser.getEmail());
-        //}else{
+        if (firebaseUser != null){
+            navHeaderTitle.setText(firebaseUser.getDisplayName());
+            navHeaderSubtitle.setText(firebaseUser.getEmail());
+        }else{
             navHeaderTitle.setText("");
             navHeaderSubtitle.setText("");
-        //}
+        }
+        navHeaderSubtitle.setText("");
 
 
 
@@ -124,6 +125,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @Override
     public boolean onPrepareOptionsMenu(Menu menu)
     {
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -167,6 +169,8 @@ public class MainActivity extends AppCompatActivity
             homeWebView.reload();
             planWebView.reload();
             programWebView.reload();
+        } else if (id == R.id.action_help){
+
         }
 
         return super.onOptionsItemSelected(item);
