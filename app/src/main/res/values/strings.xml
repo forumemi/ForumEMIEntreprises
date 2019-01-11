@@ -18,11 +18,189 @@
     <string name="signout">Se deconnecter</string>
     <string name="refresh">Actualiser</string>
     <string name="scan">Scanner</string>
-    <string name="school">Ecole</string>
-    <string name="speciality">Filière</string>
-    <string name="city">Ville</string>
-    <string name="promo">Promotion</string>
+    <string name="school">Ecole :</string>
+    <string name="speciality">Filière :</string>
+    <string name="city">Ville :</string>
+    <string name="promo">Promotion :</string>
     <string name="submit">Valider</string>
     <string name="form_string">Votre inscription est bientôt fini veuillez remplir ce formulaire SVP</string>
     <string name="help">Aide</string>
+
+    <string-array name="schools_array">
+        <item>EMI</item>
+        <item>EHTP</item>
+        <item>ENSMR</item>
+        <item>ECC</item>
+        <item>AIAC</item>
+        <item>ENSEM</item>
+        <item>ENSIAS</item>
+        <item>ESGB</item>
+        <item>ESI</item>
+        <item>ESITH</item>
+        <item>IAV</item>
+        <item>INPT</item>
+        <item>INSEA</item>
+        <item>ENSA</item>
+        <item>ENSAM</item>
+        <item>ENSET</item>
+        <item>FST</item>
+    </string-array>
+
+
+    <string-array name="aiac_array">
+        <item>Génie Industriel et Productique</item>
+        <item>Génie Électrique Électronique et Télécommunications</item>
+        <item>Génie Informatique</item>
+        <item>Ingénierie Contrôleur de la Navigation Aérienne</item>
+        <item>Électronique en Sécurité de la circulation Aérienne</item>
+    </string-array>
+
+    <string-array name="ecc_array">
+        <item>Ingénieur Généraliste</item>
+    </string-array>
+    <string-array name="ehtp_array">
+        <item>Génie Civil</item>
+        <item>Ingénierie de l’Hydraulique et de l’Environnement </item>
+        <item>Ingénierie de la Ville et de l’Environnement</item>
+        <item>Génie Électrique</item>
+        <item>Génie Informatique </item>
+        <item>Sciences de l’Information Géographique</item>
+        <item>Météorologie</item>
+    </string-array>
+    <string-array name="emi_array">
+        <item>Génie Civil</item>
+        <item>Génie Électrique</item>
+        <item>Génie Industriel</item>
+        <item>Génie Informatique</item>
+        <item>Génie Mécanique</item>
+        <item>Génie Minéral</item>
+        <item>Génie Modélisation et Informatique Scientifique</item>
+        <item>Génie des Procédés Industriels</item>
+        <item>Génie Réseaux et Télécoms</item>
+    </string-array>
+    <string-array name="ensem_array">
+        <item>Génie des Systèmes Mécaniques</item>
+        <item>Conception, Mécanique et Production Intégrée</item>
+        <item>Qualité, Maintenance et Sécurité Industrielle </item>
+        <item>Procédés industriels et Plasturgie</item>
+        <item>Automatique et Informatique Industrielle </item>
+        <item>Génie Électrique, Systèmes Embarqués et Télécommunication</item>
+        <item>Génie des Systèmes Électriques</item>
+        <item>Génie Industriel et Logistique</item>
+        <item>Génie Informatique: Réseaux et Bases de Données</item>
+    </string-array>
+    <string-array name="ensmr_array">
+        <item>Aménagement, Exploitation des Sols et Sous-Sols</item>
+        <item>Environnement et Sécurité Industriels</item>
+        <item>Matériaux et Contrôle Qualité</item>
+        <item>Génie Géologique, Hydro géotechnique et Minier</item>
+        <item>Ingénierie des Procédés Industriels</item>
+        <item>Génie Énergétique </item>
+        <item>Électromécanique</item>
+        <item>Management des Systèmes d’information et de Production</item>
+        <item>Génie Industriel</item>
+    </string-array>
+    <string-array name="ensias_array">
+        <item>e-Management et Business Intelligence</item>
+        <item>Génie Logiciel</item>
+        <item>Ingénierie e-Logistique</item>
+        <item>Ingénierie des Systèmes Embarqués et Mobiles</item>
+        <item>Ingénierie du Web et Informatique Mobile</item>
+        <item>Sécurité des systèmes d’information</item>
+    </string-array>
+    <string-array name="esi_array">
+        <item>Ingénieur des Connaissances et des Données</item>
+    </string-array>
+    <string-array name="esgb_array">
+        <item>Génie biomédical</item>
+    </string-array>
+    <string-array name="esith_array">
+        <item>Informatique et Management des systèmes</item>
+        <item>Génie Industriel</item>
+    </string-array>
+    <string-array name="iav_array">
+        <item>Sciences Géomatique et Ingénierie Topographique</item>
+        <item>Génie Rural</item>
+    </string-array>
+    <string-array name="inpt_array">
+        <item>Sciences de Données</item>
+        <item>Advanced Software Engineering For Digital Services</item>
+        <item>Systèmes Embarqués et Services Numériques</item>
+        <item>Smart Information and Communication Technology</item>
+        <item>Ingénierie des Systèmes Ubiquitaires et Distribués-Cloud et IoT</item>
+        <item>Cybersécurité et Confiance Numérique</item>
+        <item>Innovation et AMOA</item>
+    </string-array>
+    <string-array name="ensam_array">
+        <item>Génie électrique</item>
+        <item>Génie industriel</item>
+        <item>Génie Mécanique</item>
+    </string-array>
+    <string-array name="enset_array">
+        <item>Conception et production Industrielle</item>
+        <item>Génie Biomédical</item>
+        <item>Génie Électrique</item>
+        <item>Génie électrique Option : Systèmes électriques et énergies renouvelables</item>
+        <item>Génie électrique et contrôle de systèmes industriels</item>
+        <item>Génie du logiciel et des systèmes informatiques distribués</item>
+        <item>Ingénierie informatique, Big Data et Cloud Computing</item>
+        <item>Génie industrielle et logistique</item>
+        <item>Génie Mécanique des systèmes industriels</item>
+    </string-array>
+    <string-array name="ensa_array">
+        <item>EMI</item>
+        <item>EHTP</item>
+        <item>ENSMR</item>
+        <item>ECC</item>
+        <item>AIAC</item>
+        <item>ENSEM</item>
+        <item>ENSIAS</item>
+        <item>ESGB</item>
+        <item>ESI</item>
+        <item>ESITH</item>
+        <item>IAV</item>
+        <item>INPT</item>
+        <item>INSEA</item>
+        <item>ENSA</item>
+        <item>ENSAM</item>
+        <item>ENSET</item>
+        <item>FST</item>
+    </string-array>
+    <string-array name="fst_array">
+        <item>EMI</item>
+        <item>EHTP</item>
+        <item>ENSMR</item>
+        <item>ECC</item>
+        <item>AIAC</item>
+        <item>ENSEM</item>
+        <item>ENSIAS</item>
+        <item>ESGB</item>
+        <item>ESI</item>
+        <item>ESITH</item>
+        <item>IAV</item>
+        <item>INPT</item>
+        <item>INSEA</item>
+        <item>ENSA</item>
+        <item>ENSAM</item>
+        <item>ENSET</item>
+        <item>FST</item>
+    </string-array>
+    <string-array name="insea_array">
+        <item>Informatique : Génie logiciel / Ingénierie Des Données</item>
+        <item>Actuariat-Finance</item>
+        <item>Statistique-Economie Appliquée</item>
+        <item>Statistique-Démographie</item>
+        <item>Recherche Opérationelle et Aide à la décision</item>
+    </string-array>
+
+    <string-array name="promo_array">
+        <item>2018</item>
+        <item>2019</item>
+        <item>2020</item>
+        <item>2021</item>
+        <item>2022</item>
+        <item>2023</item>
+        <item>2024</item>
+        <item>2025</item>
+    </string-array>
 </resources>

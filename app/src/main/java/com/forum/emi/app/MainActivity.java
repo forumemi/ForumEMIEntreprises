@@ -18,8 +18,11 @@ import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,7 +41,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener  {
+        implements NavigationView.OnNavigationItemSelectedListener ,
+                    AdapterView.OnItemSelectedListener {
 
     private static final int RC_SIGN_IN = 123;
     private FirebaseAuth firebaseAuth = null;
@@ -49,13 +53,13 @@ public class MainActivity extends AppCompatActivity
     private WebView programWebView = null;
     private WebView companiesWebView = null;
     private NavigationView navigationView = null;
-    private EditText schoolEditText = null;
-    private EditText specialityEditText = null;
-    private EditText cityEditText = null;
-    private EditText promoEditText = null;
     private Button submit = null;
     private Dialog signUpDialog = null ;
     private String token = null;
+    private Spinner schoolSpinner = null;
+    private Spinner specialitySpinner = null;
+    private Spinner promoSpinner = null;
+    private EditText cityEditText = null;
 
     public WebViewClient webViewClient = new WebViewClient(){
         @Override
@@ -225,47 +229,51 @@ public class MainActivity extends AppCompatActivity
     private void completeSignUp() {
         signUpDialog = new Dialog(this);
         signUpDialog.setContentView(R.layout.signup_profile);
-        signUpDialog.setCancelable(true);
+        signUpDialog.setCancelable(false);
         signUpDialog.show();
 
-        schoolEditText = (EditText)signUpDialog.findViewById(R.id.school);
-        specialityEditText = (EditText)signUpDialog.findViewById(R.id.speciality);
-        cityEditText = (EditText)signUpDialog.findViewById(R.id.city);
-        promoEditText = (EditText)signUpDialog.findViewById(R.id.promo);
+        schoolSpinner =(Spinner)signUpDialog.findViewById(R.id.school_spinner);
+        ArrayAdapter<CharSequence> adapterSchoolSpinner = ArrayAdapter.createFromResource(this,
+                R.array.schools_array, android.R.layout.simple_spinner_item);
+        adapterSchoolSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        schoolSpinner.setAdapter(adapterSchoolSpinner);
+        schoolSpinner.setOnItemSelectedListener(this);
+
+        specialitySpinner = (Spinner)signUpDialog.findViewById(R.id.specility_spinner);
+
+        promoSpinner =(Spinner)signUpDialog.findViewById(R.id.promo_spinner);
+        ArrayAdapter<CharSequence> adapterPromoSpinner = ArrayAdapter.createFromResource(this,
+                R.array.promo_array, android.R.layout.simple_spinner_item);
+        adapterPromoSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        promoSpinner.setAdapter(adapterPromoSpinner);
+
+        cityEditText = (EditText)signUpDialog.findViewById(R.id.city_edittext);
+
+
 
         submit = (Button)signUpDialog.findViewById(R.id.submit);
+
+        getToken();
         
 
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getToken();
-                databaseRef.child("Users").child(firebaseUser.getUid()).child("school").setValue(schoolEditText.getText().toString());
-                databaseRef.child("Users").child(firebaseUser.getUid()).child("speciality").setValue(specialityEditText.getText().toString());
-                databaseRef.child("Users").child(firebaseUser.getUid()).child("city").setValue(cityEditText.getText().toString());
-                databaseRef.child("Users").child(firebaseUser.getUid()).child("promo").setValue(promoEditText.getText().toString());
+                final String school = schoolSpinner.getSelectedItem().toString();
+                final String speciality = specialitySpinner.getSelectedItem().toString();
+                final String promo = promoSpinner.getSelectedItem().toString();
+                final String city = cityEditText.getText().toString();
+                final String email = firebaseUser.getEmail();
+                final String name = firebaseUser.getDisplayName();
+
+                databaseRef.child("Users").child(firebaseUser.getUid()).child("school").setValue(school);
+                databaseRef.child("Users").child(firebaseUser.getUid()).child("speciality").setValue(speciality);
+                databaseRef.child("Users").child(firebaseUser.getUid()).child("promo").setValue(promo);
+                databaseRef.child("Users").child(firebaseUser.getUid()).child("city").setValue(city);
+                databaseRef.child("Users").child(firebaseUser.getUid()).child("email").setValue(email);
+                databaseRef.child("Users").child(firebaseUser.getUid()).child("name").setValue(name);
                 databaseRef.child("Users").child(firebaseUser.getUid()).child("token").setValue(token);
-            }
-
-            private void getToken() {
-                FirebaseInstanceId.getInstance().getInstanceId()
-                        .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                                if (!task.isSuccessful()) {
-                                    Log.w("token", "getInstanceId failed", task.getException());
-                                    return;
-                                }
-
-                                // Get new Instance ID token
-                                token = task.getResult().getToken();
-
-                                // Log and toast
-                                String msg = getString(R.string.msg_token_fmt, token);
-                                Log.d("token", msg);
-                                Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                signUpDialog.cancel();
             }
         });
     }
@@ -331,6 +339,7 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(MainActivity.this,ScannerActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_send) {
+            //TODO : remove this completeSignUp();
             completeSignUp();
         } else if (id == R.id.nav_share) {
 
@@ -374,4 +383,123 @@ public class MainActivity extends AppCompatActivity
 
     }
     //[END] Initiates the pages : home,plan,program,companies
+
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        if (position == 0){
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.emi_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            specialitySpinner.setAdapter(adapter);
+        } else if (position == 1) {
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.ehtp_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            specialitySpinner.setAdapter(adapter);
+        } else if (position == 2) {
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.ensmr_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            specialitySpinner.setAdapter(adapter);
+        } else if (position == 3) {
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.ecc_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            specialitySpinner.setAdapter(adapter);
+        } else if (position == 4) {
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.aiac_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            specialitySpinner.setAdapter(adapter);
+        } else if (position == 5) {
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.ensem_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            specialitySpinner.setAdapter(adapter);
+        } else if (position == 6) {
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.ensias_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            specialitySpinner.setAdapter(adapter);
+        } else if (position == 7) {
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.esgb_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            specialitySpinner.setAdapter(adapter);
+        } else if (position == 8) {
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.esi_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            specialitySpinner.setAdapter(adapter);
+        } else if (position == 9) {
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.esith_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            specialitySpinner.setAdapter(adapter);
+        } else if (position == 10) {
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.iav_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            specialitySpinner.setAdapter(adapter);
+        } else if (position == 11) {
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.inpt_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            specialitySpinner.setAdapter(adapter);
+        } else if (position == 12) {
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.insea_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            specialitySpinner.setAdapter(adapter);
+        } else if (position == 13) {
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.ensa_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            specialitySpinner.setAdapter(adapter);
+        } else if (position == 14) {
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.ensam_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            specialitySpinner.setAdapter(adapter);
+        } else if (position == 15) {
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.enset_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            specialitySpinner.setAdapter(adapter);
+        } else if (position == 16) {
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.fst_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            specialitySpinner.setAdapter(adapter);
+        }
+
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
+    private void getToken() {
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w("token", "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        // Get new Instance ID token
+                        token = task.getResult().getToken();
+
+                        // Log and toast
+                        String msg = getString(R.string.msg_token_fmt, token);
+                        Log.d("token", msg);
+                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
 }

@@ -10,27 +10,43 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
             android:text="@string/form_string"/>
-        <EditText
+        <TextView
             android:id="@+id/school"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/school" />
-        <EditText
+            android:text="@string/school" />
+        <Spinner
+            android:id="@+id/school_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <TextView
             android:id="@+id/speciality"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/speciality" />
-        <EditText
+            android:text="@string/speciality" />
+        <Spinner
+            android:id="@+id/specility_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <TextView
             android:id="@+id/promo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/promo" />
+            android:text="@string/promo" />
+        <Spinner
+            android:id="@+id/promo_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
         <EditText
-            android:id="@+id/city"
+            android:id="@+id/city_edittext"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/city" />

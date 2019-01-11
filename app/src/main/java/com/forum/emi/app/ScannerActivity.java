@@ -26,7 +26,7 @@ import com.google.zxing.integration.android.IntentResult;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ScannerActivity extends AppCompatActivity {
+public class ScannerActivity extends AppCompatActivity  {
 
     private FirebaseAuth firebaseAuth = null;
     private FirebaseUser firebaseUser = null;
