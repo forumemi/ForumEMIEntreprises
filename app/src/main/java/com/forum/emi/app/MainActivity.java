@@ -1,7 +1,12 @@
 package com.forum.emi.app;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
@@ -34,32 +39,39 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener ,
                     AdapterView.OnItemSelectedListener {
 
     private static final int RC_SIGN_IN = 123;
+    Context context = this;
     private FirebaseAuth firebaseAuth = null;
     private FirebaseUser firebaseUser = null;
-    private DatabaseReference databaseRef;
+    private DatabaseReference databaseRef = null;
     private WebView homeWebView = null;
     private WebView planWebView = null;
     private WebView programWebView = null;
     private WebView companiesWebView = null;
+    private WebView sponsorsWebView = null;
     private NavigationView navigationView = null;
     private Button submit = null;
-    private Dialog signUpDialog = null ;
+    private Dialog dialog = null;
     private String token = null;
     private Spinner schoolSpinner = null;
     private Spinner specialitySpinner = null;
     private Spinner promoSpinner = null;
-    private EditText cityEditText = null;
+    private FirebaseFirestore firebaseFirestore = null ;
 
     public WebViewClient webViewClient = new WebViewClient(){
         @Override
@@ -73,6 +85,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -100,17 +113,29 @@ public class MainActivity extends AppCompatActivity
 
 
 
-
+        // TODO : remove
         if (firebaseUser != null) {
             Toast.makeText(MainActivity.this,firebaseUser.getUid(),Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(MainActivity.this,"No user connected",Toast.LENGTH_SHORT).show();
         }
 
-        iniateWebpages();
-
+        initiateWebPages();
+        if (isInternetAvailable()){
+            companiesWebView.reload();
+            homeWebView.reload();
+            planWebView.reload();
+            programWebView.reload();
+            sponsorsWebView.reload();
+        }
 
         databaseRef = FirebaseDatabase.getInstance().getReference();
+        firebaseFirestore = FirebaseFirestore.getInstance();
+
+        Intent intent = getIntent();
+        if (Objects.equals(intent.getAction(), "newUser")){
+            completeSignUp();
+        }
 
     }
 
@@ -166,15 +191,26 @@ public class MainActivity extends AppCompatActivity
             createSignInIntent();
         } else if (id == R.id.action_signout)  {
             FirebaseAuth.getInstance().signOut();
-            Intent intent = new Intent(MainActivity.this,MainActivity.class);
+            Intent intent = new Intent(context,WelcomeActivity.class);
             startActivity(intent);
+            finish();
         } else if (id == R.id.action_refresh) {
-            companiesWebView.reload();
-            homeWebView.reload();
-            planWebView.reload();
-            programWebView.reload();
+            if (isInternetAvailable()){
+                companiesWebView.reload();
+                homeWebView.reload();
+                planWebView.reload();
+                programWebView.reload();
+                sponsorsWebView.reload();
+            }
         } else if (id == R.id.action_help){
-
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            WebView helpWebView = new WebView(this);
+            helpWebView.loadUrl("https://forum-emi-entreprises.firebaseapp.com/help.html");
+            helpWebView.setWebViewClient(webViewClient);
+            builder.setView(helpWebView);
+            builder.setTitle("Aide");
+            builder.setIcon(R.drawable.ic_help_black_24dp);
+            builder.show();
         }
 
         return super.onOptionsItemSelected(item);
@@ -214,6 +250,8 @@ public class MainActivity extends AppCompatActivity
                 // Successfully signed in
                 firebaseAuth = FirebaseAuth.getInstance();
                 firebaseUser = firebaseAuth.getCurrentUser();
+                getToken();
+
             } else {
                 // Sign in failed. If response is null the user canceled the
                 // sign-in flow using the back button. Otherwise check
@@ -227,34 +265,37 @@ public class MainActivity extends AppCompatActivity
 
     //[BEGIN] Show the form for User to complete signing up
     private void completeSignUp() {
-        signUpDialog = new Dialog(this);
-        signUpDialog.setContentView(R.layout.signup_profile);
-        signUpDialog.setCancelable(false);
-        signUpDialog.show();
+        dialog = new Dialog(context);
+        dialog.setContentView(R.layout.signup_profile);
+        dialog.setCancelable(false);
+        dialog.show();
 
-        schoolSpinner =(Spinner)signUpDialog.findViewById(R.id.school_spinner);
-        ArrayAdapter<CharSequence> adapterSchoolSpinner = ArrayAdapter.createFromResource(this,
+        schoolSpinner =(Spinner) dialog.findViewById(R.id.school_spinner);
+        ArrayAdapter<CharSequence> adapterSchoolSpinner = ArrayAdapter.createFromResource(context,
                 R.array.schools_array, android.R.layout.simple_spinner_item);
         adapterSchoolSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         schoolSpinner.setAdapter(adapterSchoolSpinner);
-        schoolSpinner.setOnItemSelectedListener(this);
+        schoolSpinner.setOnItemSelectedListener((AdapterView.OnItemSelectedListener) context);
 
-        specialitySpinner = (Spinner)signUpDialog.findViewById(R.id.specility_spinner);
+        specialitySpinner = (Spinner) dialog.findViewById(R.id.specility_spinner);
 
-        promoSpinner =(Spinner)signUpDialog.findViewById(R.id.promo_spinner);
-        ArrayAdapter<CharSequence> adapterPromoSpinner = ArrayAdapter.createFromResource(this,
+        promoSpinner =(Spinner) dialog.findViewById(R.id.promo_spinner);
+        ArrayAdapter<CharSequence> adapterPromoSpinner = ArrayAdapter.createFromResource(context,
                 R.array.promo_array, android.R.layout.simple_spinner_item);
         adapterPromoSpinner.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         promoSpinner.setAdapter(adapterPromoSpinner);
 
-        cityEditText = (EditText)signUpDialog.findViewById(R.id.city_edittext);
 
 
 
-        submit = (Button)signUpDialog.findViewById(R.id.submit);
-
+        submit = (Button) dialog.findViewById(R.id.submit);
         getToken();
-        
+        Map<String,List<String>> map = new HashMap<>();
+        List<String> stringList = Collections.emptyList();
+        map.put("complete",stringList);
+        map.put("pending",stringList);
+
+        firebaseFirestore.collection("users_registrations").document(firebaseUser.getUid()).set(map);
 
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -262,18 +303,16 @@ public class MainActivity extends AppCompatActivity
                 final String school = schoolSpinner.getSelectedItem().toString();
                 final String speciality = specialitySpinner.getSelectedItem().toString();
                 final String promo = promoSpinner.getSelectedItem().toString();
-                final String city = cityEditText.getText().toString();
                 final String email = firebaseUser.getEmail();
                 final String name = firebaseUser.getDisplayName();
 
                 databaseRef.child("Users").child(firebaseUser.getUid()).child("school").setValue(school);
                 databaseRef.child("Users").child(firebaseUser.getUid()).child("speciality").setValue(speciality);
                 databaseRef.child("Users").child(firebaseUser.getUid()).child("promo").setValue(promo);
-                databaseRef.child("Users").child(firebaseUser.getUid()).child("city").setValue(city);
                 databaseRef.child("Users").child(firebaseUser.getUid()).child("email").setValue(email);
                 databaseRef.child("Users").child(firebaseUser.getUid()).child("name").setValue(name);
                 databaseRef.child("Users").child(firebaseUser.getUid()).child("token").setValue(token);
-                signUpDialog.cancel();
+                dialog.cancel();
             }
         });
     }
@@ -337,12 +376,25 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_qrcode) {
             Intent intent = new Intent(MainActivity.this,ScannerActivity.class);
+            intent.putExtra("task","default");
             startActivity(intent);
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.nav_info) {
             //TODO : remove this completeSignUp();
-            completeSignUp();
-        } else if (id == R.id.nav_share) {
-
+            //completeSignUp();
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle("A propos");
+            builder.setIcon(R.drawable.ic_info_black_24dp);
+            builder.setMessage("message");
+            builder.show();
+        } else if (id == R.id.nav_contact) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            WebView helpWebView = new WebView(this);
+            helpWebView.loadUrl("https://forum-emi-entreprises.firebaseapp.com/contact.html");
+            helpWebView.setWebViewClient(webViewClient);
+            builder.setView(helpWebView);
+            builder.setTitle("Contactez-nous");
+            builder.setIcon(R.drawable.ic_help_black_24dp);
+            builder.show();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -353,122 +405,126 @@ public class MainActivity extends AppCompatActivity
 
 
     //[BEGIN] Initiates the pages : home,plan,program,companies
-    private void iniateWebpages() {
+    @SuppressLint("SetJavaScriptEnabled")
+    private void initiateWebPages() {
+
         homeWebView = (WebView)findViewById(R.id.home_webview);
         planWebView = (WebView)findViewById(R.id.plan_webview);
         programWebView = (WebView)findViewById(R.id.program_webview);
         companiesWebView = (WebView)findViewById(R.id.companies_webview);
+        sponsorsWebView = (WebView)findViewById(R.id.sponsors_webview);
 
         WebSettings homeWebSettings = homeWebView.getSettings();
         WebSettings planWebSettings = planWebView.getSettings();
         WebSettings companiesWebSettings = companiesWebView.getSettings();
         WebSettings programWebSettings = programWebView.getSettings();
+        WebSettings sponsorsWebSettings = sponsorsWebView.getSettings();
 
         homeWebSettings.setJavaScriptEnabled(true);
         planWebSettings.setJavaScriptEnabled(true);
         companiesWebSettings.setJavaScriptEnabled(true);
         programWebSettings.setJavaScriptEnabled(true);
+        sponsorsWebSettings.setJavaScriptEnabled(true);
 
         homeWebView.setWebViewClient(webViewClient);
         planWebView.setWebViewClient(webViewClient);
         programWebView.setWebViewClient(webViewClient);
         companiesWebView.setWebViewClient(webViewClient);
-
-        planWebSettings.setSupportZoom(true);
+        sponsorsWebView.setWebViewClient(webViewClient);
 
         homeWebView.loadUrl("https://forum-emi-entreprises.firebaseapp.com/home.html");
         planWebView.loadUrl("https://forum-emi-entreprises.firebaseapp.com/plan.html");
         companiesWebView.loadUrl("https://forum-emi-entreprises.firebaseapp.com/companies.html");
         programWebView.loadUrl("https://forum-emi-entreprises.firebaseapp.com/program.html");
+        sponsorsWebView.loadUrl("https://forum-emi-entreprises.firebaseapp.com/sponsors.html");
 
     }
     //[END] Initiates the pages : home,plan,program,companies
 
 
-    @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         if (position == 0){
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(context,
                     R.array.emi_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             specialitySpinner.setAdapter(adapter);
         } else if (position == 1) {
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(context,
                     R.array.ehtp_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             specialitySpinner.setAdapter(adapter);
         } else if (position == 2) {
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(context,
                     R.array.ensmr_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             specialitySpinner.setAdapter(adapter);
         } else if (position == 3) {
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(context,
                     R.array.ecc_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             specialitySpinner.setAdapter(adapter);
         } else if (position == 4) {
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(view.getContext(),
                     R.array.aiac_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             specialitySpinner.setAdapter(adapter);
         } else if (position == 5) {
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(view.getContext(),
                     R.array.ensem_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             specialitySpinner.setAdapter(adapter);
         } else if (position == 6) {
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(view.getContext(),
                     R.array.ensias_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             specialitySpinner.setAdapter(adapter);
         } else if (position == 7) {
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(view.getContext(),
                     R.array.esgb_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             specialitySpinner.setAdapter(adapter);
         } else if (position == 8) {
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(view.getContext(),
                     R.array.esi_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             specialitySpinner.setAdapter(adapter);
         } else if (position == 9) {
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(view.getContext(),
                     R.array.esith_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             specialitySpinner.setAdapter(adapter);
         } else if (position == 10) {
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(view.getContext(),
                     R.array.iav_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             specialitySpinner.setAdapter(adapter);
         } else if (position == 11) {
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(view.getContext(),
                     R.array.inpt_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             specialitySpinner.setAdapter(adapter);
         } else if (position == 12) {
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(view.getContext(),
                     R.array.insea_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             specialitySpinner.setAdapter(adapter);
         } else if (position == 13) {
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(view.getContext(),
                     R.array.ensa_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             specialitySpinner.setAdapter(adapter);
         } else if (position == 14) {
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(view.getContext(),
                     R.array.ensam_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             specialitySpinner.setAdapter(adapter);
         } else if (position == 15) {
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(view.getContext(),
                     R.array.enset_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             specialitySpinner.setAdapter(adapter);
         } else if (position == 16) {
-            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(view.getContext(),
                     R.array.fst_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             specialitySpinner.setAdapter(adapter);
@@ -491,15 +547,20 @@ public class MainActivity extends AppCompatActivity
                             Log.w("token", "getInstanceId failed", task.getException());
                             return;
                         }
-
                         // Get new Instance ID token
                         token = task.getResult().getToken();
-
-                        // Log and toast
-                        String msg = getString(R.string.msg_token_fmt, token);
-                        Log.d("token", msg);
-                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+                        databaseRef.child("Users").child(firebaseUser.getUid()).child("token").setValue(token);
                     }
                 });
+    }
+
+    public boolean isInternetAvailable() {
+        ConnectivityManager cm =
+                (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return isConnected;
     }
 }

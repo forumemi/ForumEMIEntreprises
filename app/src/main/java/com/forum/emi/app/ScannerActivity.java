@@ -1,70 +1,168 @@
 package com.forum.emi.app;
 
+import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
+import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.FirebaseFunctionsException;
 import com.google.firebase.functions.HttpsCallableResult;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-public class ScannerActivity extends AppCompatActivity  {
+public class ScannerActivity extends AppCompatActivity {
 
     private FirebaseAuth firebaseAuth = null;
     private FirebaseUser firebaseUser = null;
     private Button scanButton = null ;
     private FirebaseFunctions firebaseFunctions = null;
-    private TextView waitingResult = null;
-    private String company =null;
+    private TextView registredTo ;
+    private TextView processComplete ;
+    private Set<String> registredToSet = null;
+    private Set<String> processCompleteSet = null;
+    private String textString;
+    private String textString1;
+    private FirebaseFirestore firebaseFirestore;
+
+
+
 
     private View.OnClickListener scanButtonListner = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            // Handle click on Scan Button
-            // Launch Barcode Scanner
-            IntentIntegrator integrator = new IntentIntegrator(ScannerActivity.this);
-            integrator.setOrientationLocked(true);
-            integrator.setPrompt("Scannez votre QR code");
-            integrator.initiateScan();
+            if (firebaseUser == null) {
+                Toast.makeText(ScannerActivity.this,"Veuillez-vous connecter !",Toast.LENGTH_SHORT).show();
+            }else {
+                // Handle click on Scan Button
+                // Launch Barcode Scanner
+                IntentIntegrator integrator = new IntentIntegrator(ScannerActivity.this);
+                integrator.setOrientationLocked(true);
+                integrator.setPrompt("Scannez votre QR code");
+                integrator.setBeepEnabled(true);
+                integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE_TYPES);
+                integrator.initiateScan();
+            }
         }
     };
+    public WebViewClient webViewClient = new WebViewClient(){
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            return false;
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scanner);
 
+        firebaseFirestore = FirebaseFirestore.getInstance();
+
+        // Initiate Firebase Components
         firebaseFunctions = FirebaseFunctions.getInstance();
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseUser = firebaseAuth.getCurrentUser();
 
+        // Scanner Button
         scanButton = (Button)findViewById(R.id.scan_button);
         scanButton.setOnClickListener(scanButtonListner);
 
-        Intent intent = getIntent();
-        company = intent.getStringExtra("company");
-        waitingResult = (TextView)findViewById(R.id.waiting_result);
-        waitingResult.setText(company);
+        final DocumentReference completeDocRef = firebaseFirestore.collection("users_registrations").document(firebaseAuth.getUid());
+        completeDocRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot snapshot,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w("TAG", "Listen failed.", e);
+                    return;
+                }
 
+                if (snapshot != null && snapshot.exists()) {
+                    Log.d("TAG", "Current data: " + snapshot.getData().get("complete"));
+                    Object data = snapshot.getData().get("complete");
+                    processCompleteSet = new HashSet<>();
+                    for (String s : (ArrayList<String>)data){
+                        processCompleteSet.add(s);
+                    }
+                    if (processCompleteSet != null){
+                        textString1 = "";
+                        for(String s : processCompleteSet){
+                            textString1 += s + "\n";
+                        }
+                    }
+                    processComplete = (TextView)findViewById(R.id.process_complete);
+                    processComplete.setText(textString1);
+                } else {
+                    Log.d("TAG", "Current data: null");
+                }
+            }
+        });
 
+        final DocumentReference pendingDocRef = firebaseFirestore.collection("users_registrations").document(firebaseAuth.getUid());
+        pendingDocRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot snapshot,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w("TAG", "Listen failed.", e);
+                    return;
+                }
+
+                if (snapshot != null && snapshot.exists()) {
+                    Log.d("TAG", "Current data: " + snapshot.getData().get("pending"));
+                    Object data = snapshot.getData().get("pending");
+                    registredToSet = new HashSet<>();
+                    for (String s : (ArrayList<String>)data){
+                        registredToSet.add(s);
+                    }
+                    if (registredToSet != null){
+                        textString = "";
+                        for(String s : registredToSet){
+                            textString += s + "\n";
+                        }
+                    }
+                    registredTo = (TextView)findViewById(R.id.registred_to);
+                    registredTo.setText(textString);
+                } else {
+                    Log.d("TAG", "Current data: null");
+                }
+            }
+        });
     }
 
     //[BEGIN] Handle result from Barcode Scanner
@@ -72,25 +170,30 @@ public class ScannerActivity extends AppCompatActivity  {
         IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
         if (scanResult != null) {
             String result = scanResult.getContents();
-
-            addMessage(result)
-                    .addOnCompleteListener(new OnCompleteListener<String>() {
-                        @Override
-                        public void onComplete(@NonNull Task<String> task) {
-                            if (!task.isSuccessful()) {
-                                Exception e = task.getException();
-                                if (e instanceof FirebaseFunctionsException) {
-                                    FirebaseFunctionsException ffe = (FirebaseFunctionsException) e;
-                                    FirebaseFunctionsException.Code code = ffe.getCode();
-                                    Object details = ffe.getDetails();
+            if (result == null){
+                result = "";
+            }
+            if (result.length()>Crypto.key.length()){
+                if (result.substring(0,(Crypto.key).length()).equals(Crypto.key)){
+                    result = Crypto.decrypt(result);
+                    registerFunction(result)
+                            .addOnCompleteListener(new OnCompleteListener<String>() {
+                                @Override
+                                public void onComplete(@NonNull Task<String> task) {
+                                    if (!task.isSuccessful()) {
+                                        Exception e = task.getException();
+                                        if (e instanceof FirebaseFunctionsException) {
+                                            FirebaseFunctionsException ffe = (FirebaseFunctionsException) e;
+                                            FirebaseFunctionsException.Code code = ffe.getCode();
+                                            Object details = ffe.getDetails();
+                                        }
+                                        // ...
+                                    }
+                                    // ...
                                 }
-
-                                // ...
-                            }
-
-                            // ...
-                        }
-                    });
+                            });
+                }
+            }
 
         }
         // else continue with any other code you need in the method
@@ -98,11 +201,10 @@ public class ScannerActivity extends AppCompatActivity  {
     }
     //[END] Handle result from Barcode Scanner
 
-    private Task<String> addMessage(final String text) {
+    private Task<String> registerFunction(final String text)  {
         Map<String ,Object> data = new HashMap<>();
         data.put("text",text);
         data.put("push",true);
-
         return firebaseFunctions
                 .getHttpsCallable("register")
                 .call(data)
@@ -115,45 +217,37 @@ public class ScannerActivity extends AppCompatActivity  {
                         String result = (String) task.getResult().getData();
                         return result;
                     }
+
                 });
     }
-    @Override
-    public void onBackPressed() {
-        if (company != null){
-            Intent i =new Intent(this,MainActivity.class);
-            startActivity(i);
-        }else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu)
-    {
-        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        MenuItem actionRefresh = menu.findItem(R.id.action_refresh);
-        MenuItem actionSignIn = menu.findItem(R.id.action_signin);
-        MenuItem actionSignOut = menu.findItem(R.id.action_signout);
-        if (firebaseUser != null){
-            actionSignIn.setVisible(false);
-            actionSignOut.setVisible(true);
-        } else {
-            actionSignIn.setVisible(true);
-            actionSignOut.setVisible(false);
-        }
-        actionRefresh.setVisible(false);
-        return true;
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.scanner_menu, menu);
         return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_help){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            WebView helpWebView = new WebView(this);
+            helpWebView.loadUrl("https://forum-emi-entreprises.firebaseapp.com/help.html");
+            helpWebView.setWebViewClient(webViewClient);
+            builder.setView(helpWebView);
+            builder.show();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 }
 
 

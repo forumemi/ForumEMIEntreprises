@@ -25,6 +25,17 @@
     <string name="submit">Valider</string>
     <string name="form_string">Votre inscription est bientôt fini veuillez remplir ce formulaire SVP</string>
     <string name="help">Aide</string>
+    <string name="REGISTER_TASK">REGISTER</string>
+    <string name="REGISTER_STATUS">STATUS</string>
+    <string name="REGISTER_COMPANY">COMPANY</string>
+    <string name="DEFAULT_PREFS">PREFS</string>
+    <string name="PAYLOAD_TASK">TASK</string>
+    <string name="REGISTER_SUCCESS">SUCCESS</string>
+    <string name="company_registred_to">Vous êtes enregistré chez :</string>
+    <string name="REGISTRATIONS_PREF">REGISTRATIONS</string>
+    <string name="REGISTRATIONS_COMPLETE">REGISTRATIONS_COMPLETE</string>
+    <string name="company_process_complete">Vous avez déjà passer un entretien chez :</string>
+    <string name="info">A propos</string>
 
     <string-array name="schools_array">
         <item>EMI</item>
@@ -148,23 +159,31 @@
         <item>Génie Mécanique des systèmes industriels</item>
     </string-array>
     <string-array name="ensa_array">
-        <item>EMI</item>
-        <item>EHTP</item>
-        <item>ENSMR</item>
-        <item>ECC</item>
-        <item>AIAC</item>
-        <item>ENSEM</item>
-        <item>ENSIAS</item>
-        <item>ESGB</item>
-        <item>ESI</item>
-        <item>ESITH</item>
-        <item>IAV</item>
-        <item>INPT</item>
-        <item>INSEA</item>
-        <item>ENSA</item>
-        <item>ENSAM</item>
-        <item>ENSET</item>
-        <item>FST</item>
+        <item>Génie des Procédés de l’Energie et de l’Environnement</item>
+        <item>Génie Industriel</item>
+        <item>Génie Informatique</item>
+        <item>Génie Electrique</item>
+        <item>Génie Mécanique</item>
+        <item>Génie Civil</item>
+        <item>Ingénierie des Systèmes d’Information et de Communication</item>
+        <item>Génie énergétique et Électrique</item>
+        <item>Ingénierie Informatique et Technologies Émergentes</item>
+        <item>Génie des Télécoms et Réseaux</item>
+        <item>Génie Mécanique et Systèmes Automatisés</item>
+        <item>Génie Système Embarqué et Informatique Industrielle</item>
+        <item>Réseaux et systèmes de télécommunications</item>
+        <item>Génie Mécatronique d’Automobile</item>
+        <item>Génie des procédés, de l’Énergie et de l’Environnement</item>
+        <item>Systèmes Electroniques Embarqués et Commande des Systèmes</item>
+        <item>Génie des Réseaux et Télécommunications</item>
+        <item>Génie Industriel et Logistique</item>
+        <item>Génie Télécommunications et Réseaux</item>
+        <item>Génie des Systèmes Electroniques, Informatique et Réseaux</item>
+        <item>Génie des procédés &amp; Matériaux Céramiques</item>
+        <item>Génie des Systèmes Électroniques et Automatiques</item>
+        <item>Génie Eco-Énergétique et environnement industriel</item>
+        <item>Management de la Chaîne Logistique</item>
+        <item>Génie Mécatronique</item>
     </string-array>
     <string-array name="fst_array">
         <item>EMI</item>

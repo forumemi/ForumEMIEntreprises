@@ -1,29 +1,21 @@
-/**
- * Copyright 2016 Google Inc. All Rights Reserved.
- * <p>
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.forum.emi.app;
 
+import android.app.AlarmManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.media.AudioAttributes;
 import android.media.RingtoneManager;
+import android.media.SoundPool;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,32 +24,111 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
+    private static PendingIntent pi;
     private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
     private DatabaseReference databaseRef = null;
+    private Map<String,String> payload = null;
+    private String task = null;
+    private String CHANNEL_ID = "1234";
+    private Uri alarmSound = null;
+    private NotificationManager manager ;
 
-    private static final String TAG = "FCM Service";
+
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        Intent notificationIntent = new Intent(this, ScannerActivity.class);
-        notificationIntent.putExtra("company",remoteMessage.getData().get("company"));
-        PendingIntent contentIntent = PendingIntent.getActivity(this,
-                0, notificationIntent,
-                PendingIntent.FLAG_CANCEL_CURRENT);
-        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-        Notification notification = new NotificationCompat.Builder(this,"CHANNEL_ID")
-                .setContentIntent(contentIntent)
-                .setContentTitle(remoteMessage.getData().get("title"))
-                .setContentText(remoteMessage.getData().get("body"))
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setSound(alarmSound)
-                .setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000,1000, 1000, 1000, 1000, 1000,1000, 1000, 1000, 1000, 1000 })
-                .build();
-        NotificationManagerCompat manager = NotificationManagerCompat.from(getApplicationContext());
-        manager.notify(123, notification);
+        if (remoteMessage.getData().size() > 0) {
+            // Get payload from remote message
+            payload = remoteMessage.getData();
+            task = payload.get("TASK");
+
+
+            if(task.equals("notification")) {
+                // Handle Notifications
+                String flag = remoteMessage.getData().get("FLAG");
+                if (flag.equals("0")){
+                    Intent notificationIntentInvalid = new Intent(this, MyBroadcastReceiver.class);
+                    notificationIntentInvalid.putExtra("company", remoteMessage.getData().get("company"));
+                    notificationIntentInvalid.setAction("com.forum.emi.app.action.INVALID_NOTIFICATION");
+                    notificationIntentInvalid.putExtra("notification_id", 123);
+                    PendingIntent contentIntentInvalid = PendingIntent.getBroadcast(this,
+                            0, notificationIntentInvalid,
+                            PendingIntent.FLAG_CANCEL_CURRENT);
+
+                    Intent notificationIntentValid = new Intent(this, MyBroadcastReceiver.class);
+                    notificationIntentValid.putExtra("company", remoteMessage.getData().get("company"));
+                    notificationIntentValid.setAction("com.forum.emi.app.action.VALID_NOTIFICATION");
+                    notificationIntentValid.putExtra("notification_id", 123);
+                    PendingIntent contentIntentValid = PendingIntent.getBroadcast(this,0, notificationIntentValid,PendingIntent.FLAG_CANCEL_CURRENT);
+
+                    alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+
+
+
+                    Notification notification = new NotificationCompat.Builder(this,CHANNEL_ID)
+                            .addAction(R.mipmap.ic_launcher,"Confirmer",contentIntentValid)
+                            .addAction(R.mipmap.ic_launcher,"Abondonner",contentIntentInvalid)
+                            .setOngoing(true)
+                            .setFullScreenIntent(null,true)
+                            .setAutoCancel(true)
+                            .setContentTitle(remoteMessage.getData().get("title"))
+                            .setContentText(remoteMessage.getData().get("body"))
+                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setSound(alarmSound)
+                            .setPriority(NotificationCompat.PRIORITY_MAX)
+                            .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000})
+                            .build();
+                    manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    createNotificationChannel();
+                    manager.notify(123, notification);
+
+                    AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
+                    Intent cancelNotificationIntent = new Intent(this,MyBroadcastReceiver.class);
+                    cancelNotificationIntent.putExtra("company", remoteMessage.getData().get("company"));
+                    cancelNotificationIntent.setAction("com.forum.emi.app.action.CANCEL_NOTIFICATION");
+                    cancelNotificationIntent.putExtra("notification_id", 123);
+                    pi = PendingIntent.getBroadcast(this, 0, cancelNotificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP,Calendar.getInstance().getTimeInMillis()+15*1000,pi);
+                } else {
+                    alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+                    Notification notification = new NotificationCompat.Builder(this,CHANNEL_ID)
+                            .setFullScreenIntent(null,true)
+                            .setAutoCancel(true)
+                            .setContentTitle(remoteMessage.getData().get("title"))
+                            .setContentText(remoteMessage.getData().get("body"))
+                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setSound(alarmSound)
+                            .setPriority(NotificationCompat.PRIORITY_MAX)
+                            .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000})
+                            .build();
+                    manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    createNotificationChannel();
+                    manager.notify(123, notification);
+                }
+
+            }
+        }
+        if (remoteMessage.getNotification() != null) {
+            Notification notification = new NotificationCompat.Builder(this,"1234")
+                    .setContentTitle(remoteMessage.getNotification().getTitle())
+                    .setContentText(remoteMessage.getNotification().getBody())
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setPriority(NotificationCompat.PRIORITY_MAX)
+                    .build();
+            NotificationManagerCompat manager = NotificationManagerCompat.from(getApplicationContext());
+            createNotificationChannel();
+            manager.notify(123, notification);
+        }
+
+
     }
 
     // [START on_new_token]
@@ -69,16 +140,44 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      */
     @Override
     public void onNewToken(String token) {
-        Log.d("token", "Refreshed token: " + token);
-
-        // If you want to send messages to this application instance or
-        // manage this apps subscriptions on the server side, send the
-        // Instance ID token to your app server.
         sendRegistrationToServer(token);
     }
 
     private void sendRegistrationToServer(String token) {
-        databaseRef.child("Users").child(firebaseUser.getUid()).child("token").setValue(token);
+        if (databaseRef != null){
+            databaseRef.child("Users").child(firebaseUser.getUid()).child("token").setValue(token);
+        }
     }
     // [END on_new_token]
+
+    /**
+     * This is used in order to retrive the PendingIntent from MyBroadcastReceiver
+     * to handle responding to notification ( VALID / INVALID )
+     */
+    public static PendingIntent getPendingIntent(){
+        return pi;
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "channel_name";
+            String description = "channel_description";
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .build();
+            channel.setSound(alarmSound,audioAttributes);
+            channel.enableVibration(true);
+            channel.setVibrationPattern(new long[]{1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000});
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            manager.createNotificationChannel(channel);
+        }
+    }
+
 }
