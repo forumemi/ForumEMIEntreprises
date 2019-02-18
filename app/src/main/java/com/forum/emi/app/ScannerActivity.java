@@ -1,16 +1,14 @@
 package com.forum.emi.app;
 
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,7 +35,6 @@ import com.google.firebase.functions.HttpsCallableResult;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -58,7 +55,14 @@ public class ScannerActivity extends AppCompatActivity {
     private String textString1;
     private FirebaseFirestore firebaseFirestore;
 
+    private RecyclerView recyclerViewComplete;
+    private RecyclerView.Adapter adapterComplete;
+    private RecyclerView.LayoutManager layoutManagerComplete;
 
+    private RecyclerView recyclerViewPending;
+    private RecyclerView.Adapter adapterPending;
+    private RecyclerView.LayoutManager layoutManagerPending;
+    private Vibrator myVib;
 
 
     private View.OnClickListener scanButtonListner = new View.OnClickListener() {
@@ -91,6 +95,16 @@ public class ScannerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scanner);
 
+        myVib = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
+
+        recyclerViewComplete = (RecyclerView)findViewById(R.id.recycle_view_Complete);
+        layoutManagerComplete = new LinearLayoutManager(this);
+        recyclerViewComplete.setLayoutManager(layoutManagerComplete);
+
+        recyclerViewPending = (RecyclerView)findViewById(R.id.recycle_view_pending);
+        layoutManagerPending = new LinearLayoutManager(this);
+        recyclerViewPending.setLayoutManager(layoutManagerPending);
+
         firebaseFirestore = FirebaseFirestore.getInstance();
 
         // Initiate Firebase Components
@@ -114,50 +128,15 @@ public class ScannerActivity extends AppCompatActivity {
 
                 if (snapshot != null && snapshot.exists()) {
                     Log.d("TAG", "Current data: " + snapshot.getData().get("complete"));
-                    Object data = snapshot.getData().get("complete");
-                    processCompleteSet = new HashSet<>();
-                    for (String s : (ArrayList<String>)data){
-                        processCompleteSet.add(s);
-                    }
-                    if (processCompleteSet != null){
-                        textString1 = "";
-                        for(String s : processCompleteSet){
-                            textString1 += s + "\n";
-                        }
-                    }
-                    processComplete = (TextView)findViewById(R.id.process_complete);
-                    processComplete.setText(textString1);
-                } else {
-                    Log.d("TAG", "Current data: null");
-                }
-            }
-        });
 
-        final DocumentReference pendingDocRef = firebaseFirestore.collection("users_registrations").document(firebaseAuth.getUid());
-        pendingDocRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot snapshot,
-                                @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    Log.w("TAG", "Listen failed.", e);
-                    return;
-                }
+                    Object dataCompelte = snapshot.getData().get("complete");
+                    Object dataPenging = snapshot.getData().get("pending");
 
-                if (snapshot != null && snapshot.exists()) {
-                    Log.d("TAG", "Current data: " + snapshot.getData().get("pending"));
-                    Object data = snapshot.getData().get("pending");
-                    registredToSet = new HashSet<>();
-                    for (String s : (ArrayList<String>)data){
-                        registredToSet.add(s);
-                    }
-                    if (registredToSet != null){
-                        textString = "";
-                        for(String s : registredToSet){
-                            textString += s + "\n";
-                        }
-                    }
-                    registredTo = (TextView)findViewById(R.id.registred_to);
-                    registredTo.setText(textString);
+                    adapterComplete = new MyAdapter((ArrayList<String>)dataCompelte);
+                    recyclerViewComplete.setAdapter(adapterComplete);
+
+                    adapterPending = new MyAdapter((ArrayList<String>)dataPenging);
+                    recyclerViewPending.setAdapter(adapterPending);
                 } else {
                     Log.d("TAG", "Current data: null");
                 }
@@ -214,6 +193,7 @@ public class ScannerActivity extends AppCompatActivity {
                         // This continuation runs on either success or failure, but if the task
                         // has failed then getResult() will throw an Exception which will be
                         // propagated down.
+                        myVib.vibrate(50);
                         String result = (String) task.getResult().getData();
                         return result;
                     }

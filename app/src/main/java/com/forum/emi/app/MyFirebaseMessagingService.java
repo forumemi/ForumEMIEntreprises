@@ -71,11 +71,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
                     alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
 
-
+                    // TODO : fix notification icons red color
+                    // TODO : fix sound for android pie
 
                     Notification notification = new NotificationCompat.Builder(this,CHANNEL_ID)
-                            .addAction(R.mipmap.ic_launcher,"Confirmer",contentIntentValid)
-                            .addAction(R.mipmap.ic_launcher,"Abondonner",contentIntentInvalid)
+                            .addAction(R.drawable.ic_check_circle_black_24dp,"Confirmer",contentIntentValid)
+                            .addAction(R.drawable.ic_remove_circle_black_24dp,"Abondonner",contentIntentInvalid)
                             .setOngoing(true)
                             .setFullScreenIntent(null,true)
                             .setAutoCancel(true)

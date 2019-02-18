@@ -10,6 +10,10 @@ import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.functions.HttpsCallableResult;
 
@@ -21,6 +25,9 @@ import static android.content.Context.ALARM_SERVICE;
 public class MyBroadcastReceiver extends BroadcastReceiver {
 
     private FirebaseFunctions firebaseFunctions = null;
+    private FirebaseFirestore firebaseFirestore = null;
+    private FirebaseAuth firebaseAuth = null;
+    private FirebaseUser firebaseUser = null;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -56,6 +63,10 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
                 NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                 notificationManager.cancel(id);
                 userNegativeResponseFunction(company);
+                firebaseFirestore = FirebaseFirestore.getInstance();
+                firebaseAuth = FirebaseAuth.getInstance();
+                firebaseUser = firebaseAuth.getCurrentUser();
+                firebaseFirestore.collection("users_registrations").document(firebaseUser.getUid()).update("pending",FieldValue.arrayRemove(company));
             }
         }
     }

@@ -295,6 +295,12 @@ public class MainActivity extends AppCompatActivity
         map.put("complete",stringList);
         map.put("pending",stringList);
 
+
+        final String email = firebaseUser.getEmail();
+        final String name = firebaseUser.getDisplayName();
+        databaseRef.child("Users").child(firebaseUser.getUid()).child("email").setValue(email);
+        databaseRef.child("Users").child(firebaseUser.getUid()).child("name").setValue(name);
+
         firebaseFirestore.collection("users_registrations").document(firebaseUser.getUid()).set(map);
 
         submit.setOnClickListener(new View.OnClickListener() {
@@ -303,14 +309,10 @@ public class MainActivity extends AppCompatActivity
                 final String school = schoolSpinner.getSelectedItem().toString();
                 final String speciality = specialitySpinner.getSelectedItem().toString();
                 final String promo = promoSpinner.getSelectedItem().toString();
-                final String email = firebaseUser.getEmail();
-                final String name = firebaseUser.getDisplayName();
 
                 databaseRef.child("Users").child(firebaseUser.getUid()).child("school").setValue(school);
                 databaseRef.child("Users").child(firebaseUser.getUid()).child("speciality").setValue(speciality);
                 databaseRef.child("Users").child(firebaseUser.getUid()).child("promo").setValue(promo);
-                databaseRef.child("Users").child(firebaseUser.getUid()).child("email").setValue(email);
-                databaseRef.child("Users").child(firebaseUser.getUid()).child("name").setValue(name);
                 databaseRef.child("Users").child(firebaseUser.getUid()).child("token").setValue(token);
                 dialog.cancel();
             }
